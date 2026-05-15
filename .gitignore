@@ -1,0 +1,16 @@
+# Fișiere compilare
+*.o
+search_engine
+
+# Baza de date
+search_index.db
+*.db
+
+# Editor
+.vscode/
+*.swp
+*~
+
+# Sistem
+.DS_Store
+Thumbs.db
