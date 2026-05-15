@@ -1,1 +1,2 @@
 # Txt-Search-Engine
+## Funcționalități
