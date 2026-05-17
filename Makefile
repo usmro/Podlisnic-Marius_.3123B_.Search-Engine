@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2
 TARGET = search_engine
-SRCS = main.cpp Document.cpp Index.cpp ConsoleUI.cpp
+SRCS = main.cpp Document.cpp Index.cpp ConsoleUI.cpp Terminal.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(TARGET)

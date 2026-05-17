@@ -25,7 +25,12 @@ void Document::tokenize() {
     while (iss >> word) {
         std::string cleanWord;
         for (char c : word) {
-            if (std::isalnum(c)) cleanWord += std::tolower(c);
+            if (c != ' ' && c != '\t' && c != '\n' && c != '\r' &&
+    c != '.' && c != ',' && c != ';' && c != ':' &&
+    c != '!' && c != '?' && c != '"' && c != '\'' &&
+    c != '(' && c != ')' && c != '-' && c != '_') {
+    cleanWord += std::tolower(c);
+}
         }
         if (!cleanWord.empty()) words.push_back(cleanWord);
     }

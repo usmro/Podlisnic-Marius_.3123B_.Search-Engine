@@ -1,8 +1,10 @@
 #ifndef CONSOLEUI_H
 #define CONSOLEUI_H
 
-#include "Index.h"
 #include <string>
+#include <vector>
+#include <atomic>
+#include "Index.h"
 
 class ConsoleUI {
 private:
@@ -14,12 +16,10 @@ private:
     
     void clearScreen();
     void printHeader();
-    void printMenu();
-    void printSeparator();
-    void printSuccess(const std::string& msg);
-    void printError(const std::string& msg);
-    void printInfo(const std::string& msg);
-    void printProgressBar(size_t current, size_t total, const std::string& label);
+    void renderMenu(int selected);
+    void printSpinner(const std::string& label, std::atomic<bool>& stop);
+    void printStatusBar();
+    std::string getRelevanceBar(size_t freq, size_t maxFreq);
     void highlightWordInText(const std::string& text, const std::string& word);
     
 public:
