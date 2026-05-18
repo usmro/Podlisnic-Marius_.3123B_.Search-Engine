@@ -14,6 +14,7 @@ private:
     
     static const std::string RESET, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, BOLD;
     int searchCount; 
+    std::string accentColor;
     void clearScreen();
     void printHeader();
     void renderMenu(int selected);

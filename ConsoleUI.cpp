@@ -21,14 +21,14 @@ const std::string ConsoleUI::CYAN = "\033[36m";
 const std::string ConsoleUI::WHITE = "\033[37m";
 const std::string ConsoleUI::BOLD = "\033[1m";
 
-ConsoleUI::ConsoleUI() : directoryPath("documente"), databaseFile("search_index.db"),searchCount(0) {
+ConsoleUI::ConsoleUI() : directoryPath("documente"), databaseFile("search_index.db"),searchCount(0),accentColor(CYAN) {
     Terminal::setupSignalHandlers();
 }
 
 void ConsoleUI::clearScreen() { Terminal::clearScreen(); }
 
 void ConsoleUI::printHeader() {
-    std::cout << BOLD << CYAN;
+    std::cout << BOLD << accentColor; 
     std::cout << "╔══════════════════════════════════════════════════════════╗\n";
     std::cout << "║           📚 MOTOR DE CĂUTARE DOCUMENTE TEXT 📚          ║\n";
     std::cout << "╚══════════════════════════════════════════════════════════╝\n";
@@ -43,6 +43,7 @@ void ConsoleUI::renderMenu(int selected) {
         {4, "Statistici"},
         {5, "Salvează baza de date"},
         {6, "Încarcă baza de date"},
+        {7, "Schimbă Tema Culori [T]"},
         {0, "Ieșire"}
     };
 
@@ -194,8 +195,12 @@ void ConsoleUI::searchDocuments() {
     std::cout << RESET;
     if (query.empty()) { std::cin.get(); return; }
 
+    auto start = std::chrono::high_resolution_clock::now();
     auto results = index.search(query);
-    if (!results.empty()) searchCount++; 
+    auto end = std::chrono::high_resolution_clock::now();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    if (!results.empty()) searchCount++;
+    std::cout << "✓ " << results.size() << " documente găsite în " << ms << "ms\n";
     std::cout << "\n";
     if (results.empty()) {
         std::cout << BLUE << "ℹ Niciun rezultat pentru '" << query << "'" << RESET << "\n";
@@ -262,7 +267,7 @@ void ConsoleUI::run() {
     clearScreen();
     
     int selected = 0;
-    int menuSize = 7; 
+    int menuSize = 8; 
     int key;
 
     while (true) {
@@ -273,10 +278,18 @@ void ConsoleUI::run() {
         std::cout << "\n   Folosește ↑/↓ pentru navigare, ENTER pentru selectare\n";
 
         key = Terminal::readKey();
+        if (key == 't' || key == 'T') {
+            if (accentColor == CYAN) accentColor = BLUE;
+            else if (accentColor == BLUE) accentColor = GREEN;
+            else accentColor = CYAN;
+            
+            clearScreen();
+            continue; 
+        }
         if (key == 1000) selected = (selected - 1 + menuSize) % menuSize;     
         else if (key == 1001) selected = (selected + 1) % menuSize;             
         else if (key == '\n' || key == '\r') {                                  
-            int choice = (selected == 6) ? 0 : (selected + 1);
+            int choice = (selected == 7) ? 0 : (selected + 1);
             Terminal::disableRawMode(); 
             switch (choice) {
                 case 1: loadDocuments(); break;
@@ -285,6 +298,11 @@ void ConsoleUI::run() {
                 case 4: showStatistics(); break;
                 case 5: saveDatabase(); break;
                 case 6: loadDatabase(); break;
+                case 7: 
+                    if (accentColor == CYAN) accentColor = BLUE;
+                    else if (accentColor == BLUE) accentColor = GREEN;
+                    else accentColor = CYAN;
+                    break;
                 case 0: 
                     clearScreen(); 
                     std::cout << GREEN << "👋 La revedere!\n" << RESET; 
