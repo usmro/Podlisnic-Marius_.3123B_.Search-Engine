@@ -13,7 +13,7 @@ private:
     std::string databaseFile;
     
     static const std::string RESET, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, BOLD;
-    
+    int searchCount; 
     void clearScreen();
     void printHeader();
     void renderMenu(int selected);

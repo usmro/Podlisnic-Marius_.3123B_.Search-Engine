@@ -21,7 +21,7 @@ const std::string ConsoleUI::CYAN = "\033[36m";
 const std::string ConsoleUI::WHITE = "\033[37m";
 const std::string ConsoleUI::BOLD = "\033[1m";
 
-ConsoleUI::ConsoleUI() : directoryPath("documente"), databaseFile("search_index.db") {
+ConsoleUI::ConsoleUI() : directoryPath("documente"), databaseFile("search_index.db"),searchCount(0) {
     Terminal::setupSignalHandlers();
 }
 
@@ -62,7 +62,9 @@ void ConsoleUI::printStatusBar() {
     std::cout << CYAN << "─────────────────────────────────────────────────────\n";
     std::cout << " 📊 Doc: " << index.getDocumentCount() 
               << " | 🔤 Cuvinte indexate: " << index.getIndexedWordsCount()
-              << " | 💾 DB: " << (databaseFile.empty() ? "N/A" : "Ready") << RESET << "\n";
+              << " | 💾 DB: " << (databaseFile.empty() ? "N/A" : "Ready") 
+              << " | 🔍 Căutări: " << searchCount 
+              << RESET << "\n";
 }
 
 void ConsoleUI::printSpinner(const std::string& label, std::atomic<bool>& stop) {
@@ -193,6 +195,7 @@ void ConsoleUI::searchDocuments() {
     if (query.empty()) { std::cin.get(); return; }
 
     auto results = index.search(query);
+    if (!results.empty()) searchCount++; 
     std::cout << "\n";
     if (results.empty()) {
         std::cout << BLUE << "ℹ Niciun rezultat pentru '" << query << "'" << RESET << "\n";
