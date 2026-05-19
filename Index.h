@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <unordered_set>
 
 struct WordOccurrence {
     std::string filePath;

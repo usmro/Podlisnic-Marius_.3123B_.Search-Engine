@@ -265,7 +265,14 @@ void ConsoleUI::loadDatabase() {
 void ConsoleUI::run() {
     Terminal::enableRawMode();
     clearScreen();
-    
+    if (fs::exists(databaseFile)) {
+        if (index.loadFromFile(databaseFile)) {
+            std::cout << GREEN << "✅ Index încărcat automat din " << databaseFile << RESET << "\n";
+            printStatusBar();
+            std::cout.flush();
+            std::this_thread::sleep_for(std::chrono::milliseconds(600));
+        }
+    }
     int selected = 0;
     int menuSize = 8; 
     int key;
