@@ -125,3 +125,18 @@ bool Index::loadFromFile(const std::string& filename) {
 
 size_t Index::getDocumentCount() const { return documents.size(); }
 size_t Index::getIndexedWordsCount() const { return wordToDocuments.size(); }
+
+std::vector<std::pair<std::string, size_t>> Index::getTopWords(size_t limit) const {
+    std::vector<std::pair<std::string, size_t>> wordFreq;
+    wordFreq.reserve(wordToDocuments.size());
+    
+    for (const auto& [word, docs] : wordToDocuments) {
+        wordFreq.emplace_back(word, docs.size());
+    }
+    
+    std::sort(wordFreq.begin(), wordFreq.end(),
+        [](const auto& a, const auto& b) { return a.second > b.second; });
+        
+    if (wordFreq.size() > limit) wordFreq.resize(limit);
+    return wordFreq;
+}

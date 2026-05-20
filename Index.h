@@ -37,7 +37,7 @@ public:
     
     bool saveToFile(const std::string& filename) const;
     bool loadFromFile(const std::string& filename);
-    
+    std::vector<std::pair<std::string, size_t>> getTopWords(size_t limit = 5) const;
     size_t getDocumentCount() const;
     size_t getIndexedWordsCount() const;
 };

@@ -235,8 +235,24 @@ void ConsoleUI::searchDocuments() {
 void ConsoleUI::showStatistics() {
     clearScreen();
     printHeader();
-    std::cout << BOLD << CYAN << "📊 Statistici\n" << RESET;
+    std::cout << BOLD << CYAN << "📊 Statistici Sistem\n" << RESET;
+    
+    // Afișăm statusul existent
     printStatusBar();
+    
+    std::cout << "\n🔝 Top 5 Cuvinte Frecvente (după nr. documente):\n";
+    auto topWords = index.getTopWords(5); // 🟢 AICI CHEMĂM FUNCȚIA NOUĂ
+    
+    if (topWords.empty()) {
+        std::cout << BLUE << "  ℹ Nu există cuvinte indexate încă." << RESET << "\n";
+    } else {
+        for (size_t i = 0; i < topWords.size(); ++i) {
+            std::cout << YELLOW << "  " << (i+1) << ". " << GREEN << topWords[i].first << RESET 
+                      << "  →  prezent în " << CYAN << topWords[i].second << " documente\n";
+        }
+    }
+    
+    std::cout << "\n";
     std::cin.get();
 }
 
