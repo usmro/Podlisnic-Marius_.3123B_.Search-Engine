@@ -4,3 +4,4 @@
 21.05.2026 16:53:11 | Baza de date a fost salvata
 21.05.2026 16:53:14 | Baza de date a fost incarcata
 21.05.2026 16:53:38 | Aplicatia a fost inchisa
+21.05.2026 16:57:16 | Aplicatia a fost inchisa

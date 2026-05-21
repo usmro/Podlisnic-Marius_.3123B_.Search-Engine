@@ -36,6 +36,7 @@ public:
     void saveDatabase();
     void loadDatabase();
     void showOperationHistory();
+    void showAbout();
 };
 
 #endif

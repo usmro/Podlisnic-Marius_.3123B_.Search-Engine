@@ -50,6 +50,7 @@ void ConsoleUI::renderMenu(int selected) {
         {6, "Încarcă baza de date"},
         {7, "Istoric operatii"},
         {8, "Schimba Tema Culori [T]"},
+        {9, "Despre aplicatie"},
         {0, "Iesire"}
     };
 
@@ -321,7 +322,7 @@ void ConsoleUI::showStatistics() {
     printHeader();
     std::cout << BOLD << CYAN << "📊 Statistici Sistem\n" << RESET;
     
-    // Afișăm statusul existent
+   
     printStatusBar();
     
     std::cout << "\n🔝 Top 5 Cuvinte Frecvente (după nr. documente):\n";
@@ -363,6 +364,26 @@ void ConsoleUI::loadDatabase() {
     addHistory("Baza de date a fost incarcata");
     std::cin.get();
 }
+void ConsoleUI::showAbout() {
+    clearScreen();
+    printHeader();
+
+    std::cout << BOLD << CYAN << "Despre aplicatie\n" << RESET;
+    std::cout << "----------------------------------\n";
+    std::cout << "Denumire: Motor de cautare documente\n";
+    std::cout << "Autor: Podlisnic Marius\n";
+    std::cout << "Limbaj: C++\n";
+    std::cout << "Paradigma: Programare orientata pe obiecte\n";
+    std::cout << "Functionalitati:\n";
+    std::cout << "- incarcare documente\n";
+    std::cout << "- construire index\n";
+    std::cout << "- cautare documente\n";
+    std::cout << "- salvare/incarcare baza de date\n";
+    std::cout << "- istoric operatii\n";
+
+    std::cout << "\nApasa ENTER pentru a reveni la meniu...";
+    std::cin.get();
+}
 
 void ConsoleUI::run() {
     Terminal::enableRawMode();
@@ -376,7 +397,7 @@ void ConsoleUI::run() {
         }
     }
     int selected = 0;
-    int menuSize = 9; 
+    int menuSize = 10;
     int key;
 
     while (true) {
@@ -398,7 +419,7 @@ void ConsoleUI::run() {
         if (key == 1000) selected = (selected - 1 + menuSize) % menuSize;     
         else if (key == 1001) selected = (selected + 1) % menuSize;             
         else if (key == '\n' || key == '\r') {                                  
-            int choice = (selected == 8) ? 0 : (selected + 1);
+            int choice = (selected == 9) ? 0 : (selected + 1);
             Terminal::disableRawMode(); 
             switch (choice) {
                 case 1: loadDocuments(); break;
@@ -412,6 +433,9 @@ void ConsoleUI::run() {
                     if (accentColor == CYAN) accentColor = BLUE;
                     else if (accentColor == BLUE) accentColor = GREEN;
                     else accentColor = CYAN;
+                    break;
+                case 9:
+                    showAbout();
                     break;
                 case 0: 
                     clearScreen(); 
