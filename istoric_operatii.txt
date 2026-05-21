@@ -1,0 +1,6 @@
+21.05.2026 16:52:42 | Au fost incarcate documentele din directorul: documente
+21.05.2026 16:52:49 | Indexul documentelor a fost construit
+21.05.2026 16:52:53 | Cautare efectuata dupa: sisteme
+21.05.2026 16:53:11 | Baza de date a fost salvata
+21.05.2026 16:53:14 | Baza de date a fost incarcata
+21.05.2026 16:53:38 | Aplicatia a fost inchisa

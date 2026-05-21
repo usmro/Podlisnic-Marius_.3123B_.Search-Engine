@@ -8,6 +8,10 @@
 #include <algorithm>
 #include <atomic>
 #include <vector>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+
 
 namespace fs = std::filesystem;
 
@@ -21,8 +25,9 @@ const std::string ConsoleUI::CYAN = "\033[36m";
 const std::string ConsoleUI::WHITE = "\033[37m";
 const std::string ConsoleUI::BOLD = "\033[1m";
 
-ConsoleUI::ConsoleUI() : directoryPath("documente"), databaseFile("search_index.db"),searchCount(0),accentColor(CYAN) {
+ConsoleUI::ConsoleUI() : directoryPath("documente"), databaseFile("search_index.db"),historyFile("istoric_operatii.txt"),searchCount(0),accentColor(CYAN) {
     Terminal::setupSignalHandlers();
+    loadHistory();
 }
 
 void ConsoleUI::clearScreen() { Terminal::clearScreen(); }
@@ -43,8 +48,9 @@ void ConsoleUI::renderMenu(int selected) {
         {4, "Statistici"},
         {5, "Salvează baza de date"},
         {6, "Încarcă baza de date"},
-        {7, "Schimbă Tema Culori [T]"},
-        {0, "Ieșire"}
+        {7, "Istoric operatii"},
+        {8, "Schimba Tema Culori [T]"},
+        {0, "Iesire"}
     };
 
     std::cout << BOLD << YELLOW << "┌─────────────────────────────────────────────────────┐\n";
@@ -97,6 +103,81 @@ void ConsoleUI::highlightWordInText(const std::string& text, const std::string& 
         pos += word.length() + RED.length() + BOLD.length() + RESET.length();
     }
     std::cout << "    Context: \"" << result << "\"\n";
+}
+void ConsoleUI::addHistory(const std::string& operation) {
+    std::time_t now = std::time(nullptr);
+    std::tm* localTime = std::localtime(&now);
+
+    std::ostringstream entry;
+    entry << std::put_time(localTime, "%d.%m.%Y %H:%M:%S")
+          << " | " << operation;
+
+    operationHistory.push_back(entry.str());
+    saveHistory();
+}
+
+void ConsoleUI::saveHistory() const {
+    std::ofstream file(historyFile);
+
+    if (!file.is_open()) {
+        return;
+    }
+
+    for (const std::string& entry : operationHistory) {
+        file << entry << "\n";
+    }
+}
+
+void ConsoleUI::loadHistory() {
+    operationHistory.clear();
+
+    std::ifstream file(historyFile);
+
+    if (!file.is_open()) {
+        return;
+    }
+
+    std::string line;
+
+    while (std::getline(file, line)) {
+        if (!line.empty()) {
+            operationHistory.push_back(line);
+        }
+    }
+}
+
+void ConsoleUI::showOperationHistory() {
+    clearScreen();
+    printHeader();
+
+    std::cout << BOLD << CYAN << "Istoric operatii\n" << RESET;
+    std::cout << YELLOW << "---------------------------------------------\n" << RESET;
+
+    if (operationHistory.empty()) {
+        std::cout << BLUE << "Istoricul este gol.\n" << RESET;
+    } else {
+        for (size_t i = 0; i < operationHistory.size(); i++) {
+            std::cout << GREEN << i + 1 << ". " << RESET
+                      << operationHistory[i] << "\n";
+        }
+    }
+
+    std::cout << YELLOW << "---------------------------------------------\n" << RESET;
+    std::cout << "\n1. Sterge istoricul";
+    std::cout << "\n0. Inapoi";
+    std::cout << "\n\nAlege optiunea: ";
+
+    std::string option;
+    std::getline(std::cin, option);
+
+    if (option == "1") {
+        operationHistory.clear();
+        saveHistory();
+
+        std::cout << GREEN << "\nIstoricul a fost sters cu succes!\n" << RESET;
+        std::cout << "Apasa ENTER pentru a continua...";
+        std::cin.get();
+    }
 }
 
 void ConsoleUI::loadDocuments() {
@@ -151,6 +232,7 @@ void ConsoleUI::loadDocuments() {
 
     std::cout << "\r" << std::string(70, ' ') << "\r"; 
     std::cout << GREEN << "✓ " << count << " documente încărcate cu succes!" << RESET << "\n";
+    addHistory("Au fost incarcate documentele din directorul: " + directoryPath);
     std::cin.get();
 }
 
@@ -176,6 +258,7 @@ void ConsoleUI::buildIndex() {
     spinnerThread.join();
     
     std::cout << GREEN << "✓ Index construit în " << ms << "ms!" << RESET << "\n";
+    addHistory("Indexul documentelor a fost construit");
     std::cin.get();
 }
 
@@ -229,6 +312,7 @@ void ConsoleUI::searchDocuments() {
             std::cout << YELLOW << "└────────────────────────────────────────\n" << RESET;
         }
     }
+    addHistory("Cautare efectuata dupa: " + query);
     std::cin.get();
 }
 
@@ -263,6 +347,7 @@ void ConsoleUI::saveDatabase() {
         std::cout << GREEN << "✓ Salvat în " << databaseFile << RESET << "\n";
     else 
         std::cout << RED << "✗ Eroare la salvare!" << RESET << "\n";
+    addHistory("Baza de date a fost salvata");
     std::cin.get();
 }
 
@@ -275,6 +360,7 @@ void ConsoleUI::loadDatabase() {
     } else {
         std::cout << RED << " Nu s-a putut încărca." << RESET << "\n";
     }
+    addHistory("Baza de date a fost incarcata");
     std::cin.get();
 }
 
@@ -290,7 +376,7 @@ void ConsoleUI::run() {
         }
     }
     int selected = 0;
-    int menuSize = 8; 
+    int menuSize = 9; 
     int key;
 
     while (true) {
@@ -312,7 +398,7 @@ void ConsoleUI::run() {
         if (key == 1000) selected = (selected - 1 + menuSize) % menuSize;     
         else if (key == 1001) selected = (selected + 1) % menuSize;             
         else if (key == '\n' || key == '\r') {                                  
-            int choice = (selected == 7) ? 0 : (selected + 1);
+            int choice = (selected == 8) ? 0 : (selected + 1);
             Terminal::disableRawMode(); 
             switch (choice) {
                 case 1: loadDocuments(); break;
@@ -321,7 +407,8 @@ void ConsoleUI::run() {
                 case 4: showStatistics(); break;
                 case 5: saveDatabase(); break;
                 case 6: loadDatabase(); break;
-                case 7: 
+                case 7: showOperationHistory(); break;
+                case 8: 
                     if (accentColor == CYAN) accentColor = BLUE;
                     else if (accentColor == BLUE) accentColor = GREEN;
                     else accentColor = CYAN;
@@ -329,6 +416,7 @@ void ConsoleUI::run() {
                 case 0: 
                     clearScreen(); 
                     std::cout << GREEN << "👋 La revedere!\n" << RESET; 
+                    addHistory("Aplicatia a fost inchisa");
                     return;
             }
             Terminal::enableRawMode(); 
