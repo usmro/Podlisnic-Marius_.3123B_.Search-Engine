@@ -39,6 +39,18 @@ void ConsoleUI::printHeader() {
     std::cout << "╚══════════════════════════════════════════════════════════╝\n";
     std::cout << RESET << "\n";
 }
+void ConsoleUI::showProgressBar(const std::string& text) {
+    std::cout << text << "\n";
+    std::cout << "[";
+
+    for (int i = 0; i < 30; i++) {
+        std::cout << "#";
+        std::cout.flush();
+        std::this_thread::sleep_for(std::chrono::milliseconds(40));
+    }
+
+    std::cout << "] 100%\n";
+}
 
 void ConsoleUI::renderMenu(int selected) {
     std::vector<std::pair<int, std::string>> items = {
@@ -184,7 +196,11 @@ void ConsoleUI::showOperationHistory() {
 void ConsoleUI::loadDocuments() {
     clearScreen();
     printHeader();
-    std::cout << BOLD << CYAN << "📂 Încărcare documente\n" << RESET;
+
+    index = Index();
+
+    showProgressBar("Se incarca documentele...");
+
 
     
     size_t totalFiles = 0;

@@ -21,6 +21,7 @@ private:
     void renderMenu(int selected);
     void printSpinner(const std::string& label, std::atomic<bool>& stop);
     void printStatusBar();
+    void showProgressBar(const std::string& text);
     std::string getRelevanceBar(size_t freq, size_t maxFreq);
     void highlightWordInText(const std::string& text, const std::string& word);
     void addHistory(const std::string& operation);

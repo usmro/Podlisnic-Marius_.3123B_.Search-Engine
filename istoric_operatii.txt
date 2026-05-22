@@ -5,3 +5,21 @@
 21.05.2026 16:53:14 | Baza de date a fost incarcata
 21.05.2026 16:53:38 | Aplicatia a fost inchisa
 21.05.2026 16:57:16 | Aplicatia a fost inchisa
+22.05.2026 18:33:06 | Au fost incarcate documentele din directorul: documente
+22.05.2026 18:34:28 | Aplicatia a fost inchisa
+22.05.2026 18:37:17 | Au fost incarcate documentele din directorul: documente
+22.05.2026 18:37:29 | Indexul documentelor a fost construit
+22.05.2026 18:37:36 | Cautare efectuata dupa: algoritmi
+22.05.2026 18:37:55 | Aplicatia a fost inchisa
+22.05.2026 18:38:03 | Au fost incarcate documentele din directorul: documente
+22.05.2026 18:38:17 | Au fost incarcate documentele din directorul: documente
+22.05.2026 18:39:48 | Indexul documentelor a fost construit
+22.05.2026 18:39:51 | Aplicatia a fost inchisa
+22.05.2026 18:40:05 | Aplicatia a fost inchisa
+22.05.2026 18:41:11 | Au fost incarcate documentele din directorul: documente
+22.05.2026 18:41:16 | Indexul documentelor a fost construit
+22.05.2026 18:41:24 | Cautare efectuata dupa: algoritmi
+22.05.2026 18:41:30 | Baza de date a fost salvata
+22.05.2026 18:41:34 | Baza de date a fost incarcata
+22.05.2026 18:41:49 | Aplicatia a fost inchisa
+22.05.2026 18:41:58 | Aplicatia a fost inchisa
