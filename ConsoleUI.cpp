@@ -63,6 +63,7 @@ void ConsoleUI::renderMenu(int selected) {
         {7, "Istoric operatii"},
         {8, "Schimba Tema Culori [T]"},
         {9, "Despre aplicatie"},
+        {10,"Cuvinte populare"},
         {0, "Iesire"}
     };
 
@@ -292,6 +293,7 @@ void ConsoleUI::searchDocuments() {
     std::string query;
     std::cout << "Cuvânt: " << GREEN;
     std::getline(std::cin, query);
+    searchStats[query]++;
     std::cout << RESET;
     if (query.empty()) { std::cin.get(); return; }
 
@@ -396,8 +398,37 @@ void ConsoleUI::showAbout() {
     std::cout << "- cautare documente\n";
     std::cout << "- salvare/incarcare baza de date\n";
     std::cout << "- istoric operatii\n";
-
     std::cout << "\nApasa ENTER pentru a reveni la meniu...";
+    std::cin.get();
+}
+void ConsoleUI::showPopularWords()
+{
+    clearScreen();
+    printHeader();
+
+    if(searchStats.empty())
+    {
+        std::cout<<"Nu exista cautari.\n";
+        std::cin.get();
+        return;
+    }
+
+    std::string topWord;
+    int maxCount=0;
+
+    for(auto item : searchStats)
+    {
+        if(item.second>maxCount)
+        {
+            maxCount=item.second;
+            topWord=item.first;
+        }
+    }
+
+    std::cout<<"Cuvant cel mai cautat: "<<topWord<<"\n";
+    std::cout<<"Numar cautari: "<<maxCount<<"\n";
+
+    std::cout<<"\nENTER pentru revenire...";
     std::cin.get();
 }
 
@@ -413,7 +444,7 @@ void ConsoleUI::run() {
         }
     }
     int selected = 0;
-    int menuSize = 10;
+    int menuSize = 11;
     int key;
 
     while (true) {
@@ -435,7 +466,7 @@ void ConsoleUI::run() {
         if (key == 1000) selected = (selected - 1 + menuSize) % menuSize;     
         else if (key == 1001) selected = (selected + 1) % menuSize;             
         else if (key == '\n' || key == '\r') {                                  
-            int choice = (selected == 9) ? 0 : (selected + 1);
+            int choice=(selected==10)?0:(selected+1);
             Terminal::disableRawMode(); 
             switch (choice) {
                 case 1: loadDocuments(); break;
@@ -452,6 +483,9 @@ void ConsoleUI::run() {
                     break;
                 case 9:
                     showAbout();
+                    break;
+                case 10:
+                    showPopularWords();
                     break;
                 case 0: 
                     clearScreen(); 

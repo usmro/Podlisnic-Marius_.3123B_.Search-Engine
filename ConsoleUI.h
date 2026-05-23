@@ -5,6 +5,7 @@
 #include <vector>
 #include <atomic>
 #include "Index.h"
+#include <map>
 
 class ConsoleUI {
 private:
@@ -24,6 +25,7 @@ private:
     void showProgressBar(const std::string& text);
     std::string getRelevanceBar(size_t freq, size_t maxFreq);
     void highlightWordInText(const std::string& text, const std::string& word);
+    std::map<std::string, int> searchStats;
     void addHistory(const std::string& operation);
     void saveHistory() const;
     void loadHistory();
@@ -38,6 +40,7 @@ public:
     void loadDatabase();
     void showOperationHistory();
     void showAbout();
+    void showPopularWords();
 };
 
 #endif
