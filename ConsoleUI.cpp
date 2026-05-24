@@ -64,6 +64,7 @@ void ConsoleUI::renderMenu(int selected) {
         {8, "Schimba Tema Culori [T]"},
         {9, "Despre aplicatie"},
         {10,"Cuvinte populare"},
+        {11, "Cautari salvate"},
         {0, "Iesire"}
     };
 
@@ -280,44 +281,90 @@ void ConsoleUI::buildIndex() {
     std::cin.get();
 }
 
+void ConsoleUI::addSavedSearch(const std::string& query) {
+    if (query.empty()) return;
+
+    for (const auto& q : savedSearches) {
+        if (q == query) return;
+    }
+
+    savedSearches.push_back(query);
+
+    if (savedSearches.size() > 10) {
+        savedSearches.erase(savedSearches.begin());
+    }
+}
+
 void ConsoleUI::searchDocuments() {
     clearScreen();
     printHeader();
+
     std::cout << BOLD << CYAN << "🔍 Căutare documente\n" << RESET;
-    
+
     if (index.getIndexedWordsCount() == 0) {
         std::cout << RED << "✗ Index gol! Construiește-l mai întâi." << RESET << "\n";
-        std::cin.get(); return;
+        std::cin.get();
+        return;
     }
 
     std::string query;
     std::cout << "Cuvânt: " << GREEN;
     std::getline(std::cin, query);
-    searchStats[query]++;
     std::cout << RESET;
-    if (query.empty()) { std::cin.get(); return; }
+
+    if (query.empty()) {
+        std::cin.get();
+        return;
+    }
+
+    addSavedSearch(query);
+    executeSearchQuery(query);
+
+    std::cin.get();
+}
+void ConsoleUI::executeSearchQuery(const std::string& query) {
+    searchStats[query]++;
 
     auto start = std::chrono::high_resolution_clock::now();
     auto results = index.search(query);
     auto end = std::chrono::high_resolution_clock::now();
+
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    if (!results.empty()) searchCount++;
-    std::cout << "✓ " << results.size() << " documente găsite în " << ms << "ms\n";
-    std::cout << "\n";
+
+    if (!results.empty()) {
+        searchCount++;
+    }
+
+    std::cout << "\n✓ " << results.size()
+              << " documente găsite în " << ms << "ms\n\n";
+
     if (results.empty()) {
         std::cout << BLUE << "ℹ Niciun rezultat pentru '" << query << "'" << RESET << "\n";
     } else {
         size_t maxFreq = 0;
-        for (const auto& r : results) if (r.second > maxFreq) maxFreq = r.second;
-        
-        std::cout << GREEN << "✓ " << results.size() << " documente găsite:\n" << RESET;
+
+        for (const auto& r : results) {
+            if (r.second > maxFreq) {
+                maxFreq = r.second;
+            }
+        }
+
+        std::cout << GREEN << "✓ " << results.size()
+                  << " documente găsite:\n" << RESET;
+
         for (size_t i = 0; i < results.size(); ++i) {
             const auto& [path, freq] = results[i];
-            std::cout << YELLOW << "┌─ #" << (i+1) << " " << getRelevanceBar(freq, maxFreq) << RESET << "\n";
+
+            std::cout << YELLOW << "┌─ #" << (i + 1)
+                      << " " << getRelevanceBar(freq, maxFreq)
+                      << RESET << "\n";
+
             std::cout << "│ " << BLUE << path << RESET << "\n";
+
             for (const auto& doc : index.getDocuments()) {
                 if (doc->getFilePath() == path) {
                     const auto& words = doc->getWords();
+
                     for (size_t j = 0; j < words.size(); ++j) {
                         if (words[j] == query) {
                             std::cout << "│ ";
@@ -325,13 +372,62 @@ void ConsoleUI::searchDocuments() {
                             break;
                         }
                     }
+
                     break;
                 }
             }
+
             std::cout << YELLOW << "└────────────────────────────────────────\n" << RESET;
         }
     }
+
     addHistory("Cautare efectuata dupa: " + query);
+}
+
+void ConsoleUI::showSavedSearches() {
+    clearScreen();
+    printHeader();
+
+    std::cout << BOLD << CYAN << "💾 Cautari salvate\n" << RESET;
+
+    if (savedSearches.empty()) {
+        std::cout << BLUE << "Nu exista cautari salvate.\n" << RESET;
+        std::cin.get();
+        return;
+    }
+
+    for (size_t i = 0; i < savedSearches.size(); ++i) {
+        std::cout << GREEN << i + 1 << ". " << RESET
+                  << savedSearches[i] << "\n";
+    }
+
+    std::cout << "\nIntrodu numarul cautarii pentru repetare sau 0 pentru inapoi: ";
+
+    std::string option;
+    std::getline(std::cin, option);
+
+    if (option == "0" || option.empty()) {
+        return;
+    }
+
+    int choice = std::stoi(option);
+
+    if (choice < 1 || choice > static_cast<int>(savedSearches.size())) {
+        std::cout << RED << "Optiune invalida!\n" << RESET;
+        std::cin.get();
+        return;
+    }
+
+    clearScreen();
+    printHeader();
+
+    std::string query = savedSearches[choice - 1];
+
+    std::cout << BOLD << CYAN << "🔍 Repetare cautare: "
+              << GREEN << query << RESET << "\n";
+
+    executeSearchQuery(query);
+
     std::cin.get();
 }
 
@@ -362,24 +458,31 @@ void ConsoleUI::showStatistics() {
 void ConsoleUI::saveDatabase() {
     clearScreen();
     printHeader();
-    if (index.saveToFile(databaseFile)) 
+
+    if (index.saveToFile(databaseFile)) {
         std::cout << GREEN << "✓ Salvat în " << databaseFile << RESET << "\n";
-    else 
+        addHistory("Baza de date a fost salvata");
+    } else {
         std::cout << RED << "✗ Eroare la salvare!" << RESET << "\n";
-    addHistory("Baza de date a fost salvata");
+        addHistory("Eroare la salvarea bazei de date");
+    }
+
     std::cin.get();
 }
 
 void ConsoleUI::loadDatabase() {
     clearScreen();
     printHeader();
+
     if (index.loadFromFile(databaseFile)) {
-        std::cout << GREEN << "✓ Bază de date încărcată!" << RESET << "\n";
+        std::cout << GREEN << "✓ Baza de date incarcata!" << RESET << "\n";
         printStatusBar();
+        addHistory("Baza de date a fost incarcata");
     } else {
-        std::cout << RED << " Nu s-a putut încărca." << RESET << "\n";
+        std::cout << RED << "✗ Nu s-a putut incarca baza de date." << RESET << "\n";
+        addHistory("Eroare la incarcarea bazei de date");
     }
-    addHistory("Baza de date a fost incarcata");
+
     std::cin.get();
 }
 void ConsoleUI::showAbout() {
@@ -444,7 +547,7 @@ void ConsoleUI::run() {
         }
     }
     int selected = 0;
-    int menuSize = 11;
+    int menuSize = 12;
     int key;
 
     while (true) {
@@ -466,7 +569,7 @@ void ConsoleUI::run() {
         if (key == 1000) selected = (selected - 1 + menuSize) % menuSize;     
         else if (key == 1001) selected = (selected + 1) % menuSize;             
         else if (key == '\n' || key == '\r') {                                  
-            int choice=(selected==10)?0:(selected+1);
+            int choice = (selected == 11) ? 0 : (selected + 1);
             Terminal::disableRawMode(); 
             switch (choice) {
                 case 1: loadDocuments(); break;
@@ -486,6 +589,9 @@ void ConsoleUI::run() {
                     break;
                 case 10:
                     showPopularWords();
+                    break;
+                case 11:
+                    showSavedSearches();
                     break;
                 case 0: 
                     clearScreen(); 

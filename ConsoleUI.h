@@ -29,6 +29,9 @@ private:
     void addHistory(const std::string& operation);
     void saveHistory() const;
     void loadHistory();
+    std::vector<std::string> savedSearches;
+    void addSavedSearch(const std::string& query);
+    void executeSearchQuery(const std::string& query);
 public:
     ConsoleUI();
     void run();
@@ -41,6 +44,7 @@ public:
     void showOperationHistory();
     void showAbout();
     void showPopularWords();
+    void showSavedSearches();
 };
 
 #endif
