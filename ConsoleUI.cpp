@@ -128,6 +128,9 @@ void ConsoleUI::addHistory(const std::string& operation) {
           << " | " << operation;
 
     operationHistory.push_back(entry.str());
+    if (operationHistory.size() > 100) {
+    operationHistory.erase(operationHistory.begin());
+    }
     saveHistory();
 }
 
@@ -310,6 +313,7 @@ void ConsoleUI::searchDocuments() {
     std::string query;
     std::cout << "Cuvânt: " << GREEN;
     std::getline(std::cin, query);
+    std::transform(query.begin(), query.end(), query.begin(), ::tolower);
     std::cout << RESET;
 
     if (query.empty()) {
