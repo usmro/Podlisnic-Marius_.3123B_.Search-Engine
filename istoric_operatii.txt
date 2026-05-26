@@ -36,3 +36,5 @@
 25.05.2026 15:29:13 | Indexul documentelor a fost construit
 25.05.2026 15:29:19 | Cautare efectuata dupa: algoritmi
 25.05.2026 15:29:52 | Aplicatia a fost inchisa
+26.05.2026 12:25:56 | Aplicatia a fost inchisa
+26.05.2026 12:26:13 | Aplicatia a fost inchisa

@@ -32,6 +32,7 @@ private:
     std::vector<std::string> savedSearches;
     void addSavedSearch(const std::string& query);
     void executeSearchQuery(const std::string& query);
+    bool confirmExit();
 public:
     ConsoleUI();
     void run();

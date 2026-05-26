@@ -539,6 +539,18 @@ void ConsoleUI::showPopularWords()
     std::cin.get();
 }
 
+bool ConsoleUI::confirmExit() {
+    clearScreen();
+    printHeader();
+
+    std::cout << YELLOW << "Sigur doresti sa iesi din aplicatie? (y/n): " << RESET;
+
+    std::string answer;
+    std::getline(std::cin, answer);
+
+    return answer == "y" || answer == "Y";
+}
+
 void ConsoleUI::run() {
     Terminal::enableRawMode();
     clearScreen();
@@ -598,10 +610,13 @@ void ConsoleUI::run() {
                     showSavedSearches();
                     break;
                 case 0: 
-                    clearScreen(); 
-                    std::cout << GREEN << "👋 La revedere!\n" << RESET; 
-                    addHistory("Aplicatia a fost inchisa");
-                    return;
+                    if (confirmExit()) {
+                        clearScreen();
+                        std::cout << GREEN << "👋 La revedere!\n" << RESET;
+                        addHistory("Aplicatia a fost inchisa");
+                        return;
+                    }               
+                    break;
             }
             Terminal::enableRawMode(); 
             selected = 0; 
