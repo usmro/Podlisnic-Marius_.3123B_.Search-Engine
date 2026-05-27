@@ -38,3 +38,10 @@
 25.05.2026 15:29:52 | Aplicatia a fost inchisa
 26.05.2026 12:25:56 | Aplicatia a fost inchisa
 26.05.2026 12:26:13 | Aplicatia a fost inchisa
+26.05.2026 14:14:11 | Cautare efectuata dupa: algoritmi
+26.05.2026 14:14:45 | Au fost incarcate documentele din directorul: documente
+26.05.2026 14:15:18 | Aplicatia a fost inchisa
+27.05.2026 18:42:18 | Cautare efectuata dupa: algritmi
+27.05.2026 18:45:53 | Aplicatia a fost inchisa
+27.05.2026 18:48:34 | Cautare efectuata dupa: algoritmi
+27.05.2026 18:48:44 | Aplicatia a fost inchisa

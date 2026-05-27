@@ -343,8 +343,29 @@ void ConsoleUI::executeSearchQuery(const std::string& query) {
               << " documente găsite în " << ms << "ms\n\n";
 
     if (results.empty()) {
-        std::cout << BLUE << "ℹ Niciun rezultat pentru '" << query << "'" << RESET << "\n";
-    } else {
+    std::cout << BLUE << "ℹ Niciun rezultat pentru '" << query << "'" << RESET << "\n";
+
+    std::string suggestion = index.findClosestWord(query);
+
+    if (!suggestion.empty()) {
+        std::cout << YELLOW << "Ai vrut sa cauti: "
+                  << GREEN << suggestion << RESET << " ? (y/n): ";
+
+        std::string answer;
+        std::getline(std::cin, answer);
+
+        if (answer == "y" || answer == "Y") {
+            clearScreen();
+            printHeader();
+
+            std::cout << BOLD << CYAN << "🔍 Căutare documente\n" << RESET;
+            std::cout << "Cautare corectata: " << GREEN << suggestion << RESET << "\n";
+
+            executeSearchQuery(suggestion);
+            return;
+        }
+    }
+} else {
         size_t maxFreq = 0;
 
         for (const auto& r : results) {

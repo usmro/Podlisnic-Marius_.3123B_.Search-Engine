@@ -140,3 +140,60 @@ std::vector<std::pair<std::string, size_t>> Index::getTopWords(size_t limit) con
     if (wordFreq.size() > limit) wordFreq.resize(limit);
     return wordFreq;
 }
+
+int Index::levenshteinDistance(const std::string& a, const std::string& b) const {
+    int n = a.size();
+    int m = b.size();
+
+    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(m + 1));
+
+    for (int i = 0; i <= n; i++) {
+        dp[i][0] = i;
+    }
+
+    for (int j = 0; j <= m; j++) {
+        dp[0][j] = j;
+    }
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            int cost = (a[i - 1] == b[j - 1]) ? 0 : 1;
+
+            dp[i][j] = std::min({
+                dp[i - 1][j] + 1,
+                dp[i][j - 1] + 1,
+                dp[i - 1][j - 1] + cost
+            });
+        }
+    }
+
+    return dp[n][m];
+}
+
+std::string Index::findClosestWord(const std::string& query) const {
+    std::string normalizedQuery = normalizeWord(query);
+
+    if (normalizedQuery.empty()) {
+        return "";
+    }
+
+    std::string bestWord = "";
+    int bestDistance = 3;
+
+    for (const auto& item : wordToDocuments) {
+        const std::string& word = item.first;
+
+        if (std::abs(static_cast<int>(word.size()) - static_cast<int>(normalizedQuery.size())) > 2) {
+            continue;
+        }
+
+        int distance = levenshteinDistance(normalizedQuery, word);
+
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            bestWord = word;
+        }
+    }
+
+    return bestWord;
+}

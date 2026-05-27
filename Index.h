@@ -24,7 +24,7 @@ private:
     std::string normalizeWord(const std::string& word) const;
     bool isStopword(const std::string& word) const;
     void loadStopwords();
-    
+    int levenshteinDistance(const std::string& a, const std::string& b) const;
 public:
     Index();
     ~Index();
@@ -40,6 +40,7 @@ public:
     std::vector<std::pair<std::string, size_t>> getTopWords(size_t limit = 5) const;
     size_t getDocumentCount() const;
     size_t getIndexedWordsCount() const;
+    std::string findClosestWord(const std::string& query) const;
 };
 
 #endif
