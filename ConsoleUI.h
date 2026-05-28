@@ -46,6 +46,7 @@ public:
     void showAbout();
     void showPopularWords();
     void showSavedSearches();
+    void refreshMenu();
 };
 
 #endif

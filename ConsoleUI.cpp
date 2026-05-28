@@ -29,8 +29,9 @@ ConsoleUI::ConsoleUI() : directoryPath("documente"), databaseFile("search_index.
     Terminal::setupSignalHandlers();
     loadHistory();
 }
-
-void ConsoleUI::clearScreen() { Terminal::clearScreen(); }
+void ConsoleUI::clearScreen() {
+    system("clear");
+}
 
 void ConsoleUI::printHeader() {
     std::cout << BOLD << accentColor; 
@@ -52,6 +53,16 @@ void ConsoleUI::showProgressBar(const std::string& text) {
     std::cout << "] 100%\n";
 }
 
+void ConsoleUI::refreshMenu() 
+{
+    clearScreen();
+    printHeader();
+
+    std::cout << BOLD << CYAN << "🔄 Meniu actualizat\n" << RESET;
+    std::cout << GREEN << "Meniul a fost reafișat. Apasă ENTER pentru a continua..." << RESET;
+    std::cin.get();
+}
+
 void ConsoleUI::renderMenu(int selected) {
     std::vector<std::pair<int, std::string>> items = {
         {1, "Încarcă documente din director"},
@@ -65,6 +76,7 @@ void ConsoleUI::renderMenu(int selected) {
         {9, "Despre aplicatie"},
         {10,"Cuvinte populare"},
         {11, "Cautari salvate"},
+        {12, "Refresh meniu"},
         {0, "Iesire"}
     };
 
@@ -584,7 +596,7 @@ void ConsoleUI::run() {
         }
     }
     int selected = 0;
-    int menuSize = 12;
+    int menuSize = 13;
     int key;
 
     while (true) {
@@ -606,7 +618,7 @@ void ConsoleUI::run() {
         if (key == 1000) selected = (selected - 1 + menuSize) % menuSize;     
         else if (key == 1001) selected = (selected + 1) % menuSize;             
         else if (key == '\n' || key == '\r') {                                  
-            int choice = (selected == 11) ? 0 : (selected + 1);
+            int choice = (selected == 12) ? 0 : (selected + 1);
             Terminal::disableRawMode(); 
             switch (choice) {
                 case 1: loadDocuments(); break;
@@ -629,6 +641,9 @@ void ConsoleUI::run() {
                     break;
                 case 11:
                     showSavedSearches();
+                    break;
+                case 12:
+                    refreshMenu();
                     break;
                 case 0: 
                     if (confirmExit()) {
