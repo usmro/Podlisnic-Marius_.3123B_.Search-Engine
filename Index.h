@@ -2,11 +2,12 @@
 #define INDEX_H
 
 #include "Document.h"
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <string>
 #include <set>
 #include <unordered_set>
+#include <memory>
 
 struct WordOccurrence {
     std::string filePath;
@@ -17,9 +18,9 @@ struct WordOccurrence {
 
 class Index {
 private:
-    std::map<std::string, std::vector<Document*>> wordToDocuments;
-    std::vector<Document*> documents;
-    std::set<std::string> stopwords;
+    std::unordered_map<std::string, std::vector<WordOccurrence>> invertedIndex;
+    std::vector<std::unique_ptr<Document>> documents;
+    std::unordered_set<std::string> stopwords;
     
     std::string normalizeWord(const std::string& word) const;
     bool isStopword(const std::string& word) const;
@@ -29,6 +30,8 @@ public:
     Index();
     ~Index();
     
+    Index(const Index&) = delete;
+    Index& operator=(const Index&) = delete;
     void addDocument(Document* doc);
     void buildIndex();
     std::vector<std::pair<std::string, size_t>> search(const std::string& query) const;

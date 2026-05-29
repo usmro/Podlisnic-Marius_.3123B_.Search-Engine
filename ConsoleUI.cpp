@@ -214,7 +214,7 @@ void ConsoleUI::loadDocuments() {
     clearScreen();
     printHeader();
 
-    index = Index();
+    index.clear();
 
     showProgressBar("Se incarca documentele...");
 
@@ -447,7 +447,15 @@ void ConsoleUI::showSavedSearches() {
         return;
     }
 
-    int choice = std::stoi(option);
+    int choice = 0;
+
+    try {
+    choice = std::stoi(option);
+    } catch (...) {
+    std::cout << RED << "Optiune invalida!\n" << RESET;
+    std::cin.get();
+    return;
+    }
 
     if (choice < 1 || choice > static_cast<int>(savedSearches.size())) {
         std::cout << RED << "Optiune invalida!\n" << RESET;

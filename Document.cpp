@@ -38,7 +38,7 @@ void Document::tokenize() {
 
 std::string Document::getFilePath() const { return filePath; }
 std::string Document::getContent() const { return content; }
-std::vector<std::string> Document::getWords() const { return words; }
+const std::vector<std::string>& Document::getWords() const { return words; }
 
 std::string Document::getContext(size_t position, size_t radius) const {
     if (position >= words.size()) return "";

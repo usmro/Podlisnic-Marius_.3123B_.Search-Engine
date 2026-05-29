@@ -4,7 +4,7 @@
 #include <cctype>
 #include <filesystem>
 #include <iostream>
-
+#include <memory>
 namespace fs = std::filesystem;
 
 Index::Index() { loadStopwords(); }
@@ -30,107 +30,121 @@ bool Index::isStopword(const std::string& word) const {
     return stopwords.find(word) != stopwords.end();
 }
 
-void Index::addDocument(Document* doc) { documents.push_back(doc); }
+void Index::addDocument(Document* doc) {
+    documents.emplace_back(doc);
+}
 
 void Index::buildIndex() {
-    wordToDocuments.clear();
-    for (Document* doc : documents) {
-        std::map<std::string, std::vector<size_t>> wordPositions;
+    invertedIndex.clear();
+
+    for (const auto& doc : documents) {
+        std::unordered_map<std::string, std::vector<size_t>> wordPositions;
         const auto& words = doc->getWords();
+
         for (size_t i = 0; i < words.size(); ++i) {
             std::string normalized = normalizeWord(words[i]);
+
             if (!normalized.empty() && !isStopword(normalized)) {
                 wordPositions[normalized].push_back(i);
             }
         }
+
         for (const auto& [word, positions] : wordPositions) {
-            bool found = false;
-            for (auto* existingDoc : wordToDocuments[word]) {
-                if (existingDoc->getFilePath() == doc->getFilePath()) { found = true; break; }
-            }
-            if (!found) wordToDocuments[word].push_back(doc);
+            WordOccurrence occurrence(doc->getFilePath());
+            occurrence.frequency = positions.size();
+            occurrence.positions = positions;
+
+            invertedIndex[word].push_back(occurrence);
         }
     }
 }
 
 std::vector<std::pair<std::string, size_t>> Index::search(const std::string& query) const {
     std::vector<std::pair<std::string, size_t>> results;
+
     std::string normalized = normalizeWord(query);
-    if (isStopword(normalized)) return results;
-    auto it = wordToDocuments.find(normalized);
-    if (it != wordToDocuments.end()) {
-        for (const Document* doc : it->second) {
-            size_t freq = 0;
-            for (const auto& word : doc->getWords())
-                if (normalizeWord(word) == normalized) freq++;
-            results.emplace_back(doc->getFilePath(), freq);
-        }
-        std::sort(results.begin(), results.end(),
-            [](const auto& a, const auto& b) { return a.second > b.second; });
+    if (normalized.empty() || isStopword(normalized)) {
+        return results;
     }
+
+    auto it = invertedIndex.find(normalized);
+
+    if (it != invertedIndex.end()) {
+        for (const WordOccurrence& occurrence : it->second) {
+            results.emplace_back(occurrence.filePath, occurrence.frequency);
+        }
+
+        std::sort(results.begin(), results.end(),
+            [](const auto& a, const auto& b) {
+                return a.second > b.second;
+            });
+    }
+
     return results;
 }
 
-std::vector<Document*> Index::getDocuments() const { return documents; }
+std::vector<Document*> Index::getDocuments() const {
+    std::vector<Document*> result;
+
+    for (const auto& doc : documents) {
+        result.push_back(doc.get());
+    }
+
+    return result;
+}
 
 void Index::clear() {
-    for (Document* doc : documents) delete doc;
     documents.clear();
-    wordToDocuments.clear();
+    invertedIndex.clear();
 }
 
 bool Index::saveToFile(const std::string& filename) const {
     std::ofstream file(filename);
     if (!file.is_open()) return false;
+
     file << documents.size() << "\n";
-    for (const Document* doc : documents) file << doc->getFilePath() << "\n";
-    file << wordToDocuments.size() << "\n";
-    for (const auto& [word, docs] : wordToDocuments) {
-        file << word << " " << docs.size();
-        for (const Document* doc : docs) file << " " << doc->getFilePath();
-        file << "\n";
-    }
-    file.close();
+
+    for (const auto& doc : documents) {
+    file << doc->getFilePath() << "\n";
+}
+
     return true;
 }
 
 bool Index::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) return false;
+
     clear();
-    size_t docCount; file >> docCount; file.ignore();
+
+    size_t docCount;
+    file >> docCount;
+    if (!file) return false;
+    file.ignore();
+
     for (size_t i = 0; i < docCount; ++i) {
-        std::string path; std::getline(file, path);
-        Document* doc = new Document(path);
-        if (doc->loadFromFile()) documents.push_back(doc);
-        else delete doc;
-    }
-    size_t indexSize; file >> indexSize; file.ignore();
-    for (size_t i = 0; i < indexSize; ++i) {
-        std::string word; size_t count;
-        file >> word >> count;
-        for (size_t j = 0; j < count; ++j) {
-            std::string path; file >> path;
-            for (Document* doc : documents) {
-                if (doc->getFilePath() == path) {
-                    wordToDocuments[word].push_back(doc);
-                    break;
-                }
-            }
+        std::string path;
+        std::getline(file, path);
+
+        auto doc = std::make_unique<Document>(path);
+
+        if (doc->loadFromFile()) {
+        documents.push_back(std::move(doc));
         }
     }
-    file.close();
+
+    buildIndex();
     return true;
 }
 
 size_t Index::getDocumentCount() const { return documents.size(); }
-size_t Index::getIndexedWordsCount() const { return wordToDocuments.size(); }
+size_t Index::getIndexedWordsCount() const { return invertedIndex.size(); }
 
 std::vector<std::pair<std::string, size_t>> Index::getTopWords(size_t limit) const {
     std::vector<std::pair<std::string, size_t>> wordFreq;
-    wordFreq.reserve(wordToDocuments.size());
+    wordFreq.reserve(invertedIndex.size());
     
-    for (const auto& [word, docs] : wordToDocuments) {
+    for (const auto& [word, docs] : invertedIndex) {
         wordFreq.emplace_back(word, docs.size());
     }
     
@@ -180,7 +194,7 @@ std::string Index::findClosestWord(const std::string& query) const {
     std::string bestWord = "";
     int bestDistance = 3;
 
-    for (const auto& item : wordToDocuments) {
+    for (const auto& item :invertedIndex ) {
         const std::string& word = item.first;
 
         if (std::abs(static_cast<int>(word.size()) - static_cast<int>(normalizedQuery.size())) > 2) {

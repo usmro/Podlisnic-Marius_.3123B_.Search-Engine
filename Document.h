@@ -17,7 +17,7 @@ public:
     bool loadFromFile();
     std::string getFilePath() const;
     std::string getContent() const;
-    std::vector<std::string> getWords() const;
+    const std::vector<std::string>& getWords() const;
     void tokenize();
     std::string getContext(size_t position, size_t radius = 2) const;
 };
